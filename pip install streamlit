@@ -1,0 +1,39 @@
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set up Streamlit app title and description
+st.title("Premier League Football Stats Analysis")
+st.write("An analysis of player efficiency in the Premier League based on goals per million pounds.")
+
+# Load the dataset
+# Assuming you have a file named 'premier_league_player_data.csv' in the same directory
+@st.cache
+def load_data():
+    return pd.read_csv("premier_league_player_data.csv")
+
+# Load data
+data = load_data()
+
+# Display the data if needed
+if st.checkbox("Show raw data"):
+    st.write(data)
+
+# Calculate goals per million pounds
+data["goals_per_million"] = data["goals"] / data["market_value_in_millions"]
+
+# Select top 10 efficient players
+top_players = data.nlargest(10, 'goals_per_million')
+
+# Display top players
+st.write("### Top 10 Players by Goals per Million Pounds Efficiency")
+st.write(top_players[['player_name', 'goals', 'market_value_in_millions', 'goals_per_million']])
+
+# Plotting the data
+st.write("### Efficiency Chart")
+fig, ax = plt.subplots()
+sns.barplot(x="goals_per_million", y="player_name", data=top_players, ax=ax, palette="viridis")
+ax.set_xlabel("Goals per Million Pounds")
+ax.set_ylabel("Player Name")
+st.pyplot(fig)
